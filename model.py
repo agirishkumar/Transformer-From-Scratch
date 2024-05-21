@@ -79,6 +79,7 @@ class LayerNormalization(nn.Module):
         Returns:
             None
         """
+        super().__init__()
         self.eps = eps
         self.alpha = nn.Parameter(torch.ones(1)) # multiplier
         self.bias = nn.Parameter(torch.zeros(1)) # Adder
@@ -156,7 +157,7 @@ class MultiHeadAttentionBlock(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     @staticmethod
-    def attention(self, key, value, query, mask, dropout):
+    def attention(key, value, query, mask, dropout):
         """
         Compute the attention scores between the query, key, and value tensors.
 
@@ -207,12 +208,11 @@ class MultiHeadAttentionBlock(nn.Module):
         return self.w_o(x)
     
 class ResidualConnectionLayer(nn.Module):
-    def __init__(self, d_model: int, dropout: float):
+    def __init__(self, dropout: float):
         """
         Initializes the ResidualConnectionLayer module with the given d_model and dropout values.
 
         Args:
-            d_model (int): The dimension of the model.
             dropout (float): The dropout rate.
 
         Returns:
@@ -430,6 +430,7 @@ class Transformer(nn.Module):
         Returns:
             torch.Tensor: The output tensor of shape (batch_size, seq_len, d_model) after decoding the target sequence.
         """
+        # tgt = tgt.long() 
         tgt = self.tgt_embed(tgt)
         tgt = self.tgt_pos(tgt)
         return self.decoder(tgt, encoder_out, src_mask, tgt_mask)
@@ -489,7 +490,7 @@ def build_transformer(src_vocab_size: int, tgt_vocab_size: int, src_seq_len: int
     
     # create the embedding layers
     src_embed = InputEmbedding(d_model, src_vocab_size)
-    tgt_embed = PositionalEncoding(d_model, tgt_vocab_size)
+    tgt_embed = InputEmbedding(d_model, tgt_vocab_size)
 
     # create the positional encodings
     src_pos = PositionalEncoding(d_model, src_seq_len, dropout)
